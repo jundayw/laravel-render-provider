@@ -167,7 +167,7 @@ class RenderFactory
      */
     public function error($error = 'ERROR', $url = '', $errors = [])
     {
-        $this->with('state', true);
+        $this->with('state', false);
         $this->with('error', $error);
         $this->with('url', $url);
         $this->with('errors', $errors);
