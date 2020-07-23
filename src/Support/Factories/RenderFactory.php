@@ -53,7 +53,7 @@ class RenderFactory
     public function with($key, $value)
     {
         $this->attrs[$key] = $key;
-        $this->data[$key] = $value;
+        $this->data[$key]  = $value;
         return $this;
     }
 
@@ -69,6 +69,16 @@ class RenderFactory
             $this->with($key, $item);
         }
 
+        return $this;
+    }
+
+    /**
+     * 重置
+     * @return $this
+     */
+    public function reset()
+    {
+        $this->attrs = $this->data = [];
         return $this;
     }
 
@@ -155,7 +165,7 @@ class RenderFactory
         $this->with('message', $message);
         $this->with('url', $url);
         $this->with('data', $data);
-        $this->with('timestamp', date('Y-m-d\Th:i:s\Z'));
+        $this->with('timestamp', date('Y-m-d\TH:i:s\Z'));
         return $this;
     }
 
@@ -171,7 +181,7 @@ class RenderFactory
         $this->with('error', $error);
         $this->with('url', $url);
         $this->with('errors', $errors);
-        $this->with('timestamp', date('Y-m-d\Th:i:s\Z'));
+        $this->with('timestamp', date('Y-m-d\TH:i:s\Z'));
         return $this;
     }
 }
