@@ -1,0 +1,30 @@
+{
+    "name": "jundayw/laravel-render-provider",
+    "description": "laravel render provider",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "jundayw",
+            "email": "jundayw@126.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jundayw\\LaravelRenderProvider\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jundayw\\LaravelRenderProvider\\RenderServiceProvider"
+            ],
+            "aliases": {
+                "Render": "Jundayw\\LaravelRenderProvider\\Support\\Facades\\Render"
+            }
+        }
+    }
+}
