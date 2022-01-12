@@ -5,9 +5,9 @@ namespace Jundayw\LaravelRenderProvider\Support\Factories;
 use BadMethodCallException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-use Jundayw\LaravelRenderProvider\Support\Contracts\Factory;
+use Jundayw\LaravelRenderProvider\Support\Contracts\Render;
 
-class RenderFactory implements Factory
+class RenderFactory implements Render
 {
     use Macroable {
         __call as macroCall;

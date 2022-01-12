@@ -2,7 +2,7 @@
 
 namespace Jundayw\LaravelRenderProvider\Support\Contracts;
 
-interface Factory
+interface Render
 {
     /**
      * 替换键值
