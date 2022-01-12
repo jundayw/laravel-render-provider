@@ -372,7 +372,7 @@ $render = Render::reset()       // 防止数据混淆
     ->with('forget', 'forget')
     ->with('hidden', 'hidden')
     ->with('code', 200)
-    ->forget('forget')->hidden('forget')->replace('code', 'status');// 方法优先级相同
+    ->forget('forget')->hidden('hidden')->replace('code', 'status');// 方法优先级相同
 
 return $render->get('status');
 return $render->all();
@@ -390,7 +390,7 @@ return Render::reset()          // 防止数据混淆
     ->with('forget', 'forget')
     ->with('hidden', 'hidden')
     ->with('code', 200)
-    ->forget('forget')->hidden('forget')->replace('code', 'status')// 方法优先级相同
+    ->forget('forget')->hidden('hidden')->replace('code', 'status')// 方法优先级相同
     ->json()->jsonp()           // 方法优先级相同
     ->response();               // response 为防止数据混淆，内部已经调用 reset() 方法
 ```

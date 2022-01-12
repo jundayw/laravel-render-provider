@@ -4,6 +4,7 @@ namespace Jundayw\LaravelRenderProvider\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Traits\Macroable;
+use Jundayw\LaravelRenderProvider\Support\Contracts\Factory;
 use Jundayw\LaravelRenderProvider\Support\Factories\RenderFactory;
 
 /**
@@ -39,6 +40,6 @@ class Render extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'render';
+        return Factory::class;
     }
 }

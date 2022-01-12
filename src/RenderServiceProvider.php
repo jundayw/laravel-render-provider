@@ -4,6 +4,7 @@ namespace Jundayw\LaravelRenderProvider;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
+use Jundayw\LaravelRenderProvider\Support\Contracts\Factory;
 use Jundayw\LaravelRenderProvider\Support\Facades\Render;
 use Jundayw\LaravelRenderProvider\Support\Factories\RenderFactory;
 
@@ -16,7 +17,8 @@ class RenderServiceProvider extends ServiceProvider implements DeferrableProvide
      */
     public function register()
     {
-        $this->app->bind('render', RenderFactory::class);
+        $this->app->bind(Factory::class, RenderFactory::class);
+        // $this->app->bind('render', Factory::class);
         // PackageManifest loaded from composer.json of extra.laravel.aliases
         //$this->registerFacade();
     }
@@ -39,7 +41,7 @@ class RenderServiceProvider extends ServiceProvider implements DeferrableProvide
      *
      * @return void
      */
-    public function boot(RenderFactory $factory)
+    public function boot(Factory $factory)
     {
         $factory->macro('success', function(?string $message = 'SUCCESS', ?string $url = null, mixed $data = null) {
             $this->with('state', true);
@@ -61,6 +63,6 @@ class RenderServiceProvider extends ServiceProvider implements DeferrableProvide
 
     public function provides()
     {
-        return ['render'];
+        return [Factory::class];
     }
 }
