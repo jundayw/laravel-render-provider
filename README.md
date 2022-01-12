@@ -266,7 +266,7 @@ return Render::success('ok', 'url...', 'data...')
     ->jsonp()
     ->response();
 ```
-```jsonp
+```javascript
 jsonp({
     "state": true,
     "message": "ok",
@@ -319,26 +319,86 @@ array (
 
 # 宏场景
 
+## RenderFacade
 应用包已扩展 success/error 方法，若不适用业务场景，可通过 Render::flush() 方法格式化后自行定义。
 ```php
-Render::macro('success', function(?string $message = 'SUCCESS', ?string $url = null, mixed $data = null) {
-    $this->with('state', true);
-    $this->with('message', $message);
-    $this->with('url', $url);
-    $this->with('data', $data);
-    $this->with('timestamp', date('Y-m-d\TH:i:s\Z'));
-    return $this;
-});
-Render::macro('error', function(?string $error = 'ERROR', ?string $url = null, mixed $errors = null) {
-    $this->with('state', false);
-    $this->with('error', $error);
-    $this->with('url', $url);
-    $this->with('errors', $errors);
-    $this->with('timestamp', date('Y-m-d\TH:i:s\Z'));
-    return $this;
-});
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Jundayw\LaravelRenderProvider\Support\Facades\Render;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot()
+    {
+        Render::flush();
+        Render::macro('success', function(?string $message = 'SUCCESS', ?string $url = null, mixed $data = null) {
+            return $this->data([
+                'state' => true,
+                'message' => $message,
+                'url' => $url,
+                'data' => $data,
+                'timestamp' => date('Y-m-d\TH:i:s\Z'),
+            ], true);
+        });
+        Render::macro('error', function(?string $error = 'ERROR', ?string $url = null, mixed $errors = null) {
+            return $this->data([
+                'state' => false,
+                'error' => $error,
+                'url' => $url,
+                'errors' => $errors,
+                'timestamp' => date('Y-m-d\TH:i:s\Z'),
+            ], true);
+        });
+    }
+}
 ```
-推荐以上方法在服务提供者中扩展。
+调用方式
+```php
+return Render::reset()->success('ok', 'url...', 'data...')->with('code', 4)->response();
+return Render::reset()->error('error', 'url...', 'data...')->with('code', 4)->response();
+```
+
+## ResponseFacade
+```php
+namespace App\Providers;
+
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\ServiceProvider;
+use Jundayw\LaravelRenderProvider\Support\Facades\Render;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot()
+    {
+        Response::macro('success', function(?string $message = 'SUCCESS', ?string $url = null, mixed $data = null) {
+            return Render::reset()
+                ->data([
+                    'state' => true,
+                    'message' => $message,
+                    'url' => $url,
+                    'data' => $data,
+                    'timestamp' => date('Y-m-d\TH:i:s\Z'),
+                ], true);
+        });
+        Response::macro('error', function(?string $error = 'ERROR', ?string $url = null, mixed $errors = null) {
+            return Render::reset()
+                ->data([
+                    'state' => false,
+                    'error' => $error,
+                    'url' => $url,
+                    'errors' => $errors,
+                    'timestamp' => date('Y-m-d\TH:i:s\Z'),
+                ], true);
+        });
+    }
+}
+```
+调用方式
+```php
+return response()->success('ok', 'url...', 'data...')->with('code', 4)->response();
+return response()->error('error', 'url...', 'data...')->with('code', 4)->response();
+```
 
 # 其他场景
 
