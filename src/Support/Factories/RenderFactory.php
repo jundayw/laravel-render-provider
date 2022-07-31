@@ -2,69 +2,143 @@
 
 namespace Jundayw\LaravelRenderProvider\Support\Factories;
 
+use BadMethodCallException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use Jundayw\LaravelRenderProvider\Support\Contracts\Render;
 
-class RenderFactory
+class RenderFactory implements Render
 {
     use Macroable {
         __call as macroCall;
     }
 
-    protected $attrs = [];
-    protected $hidden = [];
-    protected $data = [];
+    protected $attrs   = [];
+    protected $hiddens = [];
+    protected $forgets = [];
+    protected $data    = [];
+    protected $format;
 
     /**
      * 替换键值
-     * $this->attr('message','msg')
-     * @param $old
-     * @param $new
-     * @return $this
+     *
+     * @param string $oldKey
+     * @param string $newKey
+     * @return RenderFactory
+     *
+     * @example $this->replace('message','msg')
      */
-    public function attr($old, $new)
+    public function replace(string $oldKey, string $newKey): RenderFactory
     {
-        $this->attrs[$old] = $new;
+        if (array_key_exists($oldKey, $this->attrs)) {
+            $this->attrs[$oldKey] = $newKey;
+        }
+
         return $this;
     }
 
     /**
      * 隐藏键值
-     * $this->hidden(['msg','data']|'msg')
-     * @param array $hidden
-     * @return $this
+     *
+     * @param mixed $hiddens
+     * @return RenderFactory
+     *
+     * @example $this->hidden('message')
+     * @example $this->hidden('message','data')
+     * @example $this->hidden(['message','data'])
      */
-    public function hidden($hidden = [])
+    public function hidden(mixed $hiddens): RenderFactory
     {
-        $hidden = is_array($hidden) ? $hidden : explode(',', $hidden);
-        foreach ($hidden as $item) {
-            $this->hidden[] = $item;
+        $hiddens = is_array($hiddens) ? $hiddens : func_get_args();
+
+        foreach ($hiddens as $hidden) {
+            $this->hiddens[$hidden] = $hidden;
         }
+
+        return $this;
+    }
+
+    /**
+     * 移除键值
+     *
+     * @param mixed $forgets
+     * @return RenderFactory
+     *
+     * @example $this->forget('message')
+     * @example $this->forget('message','data')
+     * @example $this->forget(['message','data'])
+     */
+    public function forget(mixed $forgets): RenderFactory
+    {
+        $forgets = is_array($forgets) ? $forgets : func_get_args();
+
+        foreach ($forgets as $forget) {
+            $this->forgets[$forget] = $forget;
+        }
+
         return $this;
     }
 
     /**
      * 追加数据
-     * $this->with('message','ok')
-     * @param $key
-     * @param $value
-     * @return $this
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return RenderFactory
+     *
+     * @example $this->with('message','ok')
      */
-    public function with($key, $value)
+    public function with(string $key, mixed $value): RenderFactory
     {
         $this->attrs[$key] = $key;
         $this->data[$key]  = $value;
+
         return $this;
     }
 
     /**
-     * 批量赋值
-     * $this->data(['msg'=>'msg','state'=>true])
-     * @param array $data
-     * @return $this
+     * 重置对象
+     *
+     * @return RenderFactory
+     *
+     * @example $this->reset()
      */
-    public function data($data = [])
+    public function reset(): RenderFactory
     {
+        $this->attrs = $this->hiddens = $this->forgets = $this->data = [];
+
+        return $this;
+    }
+
+    /**
+     * 刷新对象及宏
+     *
+     * @return RenderFactory
+     *
+     * @example $this->flush()
+     */
+    public function flush(): RenderFactory
+    {
+        static::flushMacros();
+
+        return $this->reset();
+    }
+
+    /**
+     * 批量赋值
+     *
+     * @param array $data 批量数据
+     * @param bool $append 追加数据模式
+     * @return RenderFactory
+     *
+     * @example $this->data(['message'=>'message','state'=>true])
+     */
+    public function data(array $data = [], bool $append = false): RenderFactory
+    {
+        if ($append === false) {
+            $this->reset();
+        }
+
         foreach ($data as $key => $item) {
             $this->with($key, $item);
         }
@@ -73,115 +147,144 @@ class RenderFactory
     }
 
     /**
-     * 重置
-     * @return $this
-     */
-    public function reset()
-    {
-        $this->attrs = $this->data = [];
-        return $this;
-    }
-
-    /**
      * 数据解析
-     * @return $this
+     *
+     * @return array<string,mixed>
+     *
+     * @example $this->build()
      */
-    public function build()
+    protected function build(): array
     {
         $data = [];
 
-        foreach ($this->attrs as $key => $item) {
-            if (in_array($item, $this->hidden)) {
+        foreach ($this->attrs as $key => $attr) {
+            if (in_array($attr, $this->forgets)) {
                 continue;
             }
-            $data[$item] = $this->data[$key] ?? null;
+            $data[$attr] = $this->data[$key] ?? null;
         }
 
-        $this->data = $data;
-        return $this;
-    }
-
-    /**
-     * 获取值
-     * @param $key
-     * @return mixed|null
-     */
-    public function get($key)
-    {
-        $data = $this->all();
-        return array_key_exists($key, $data) ? $data[$key] : null;
+        return $data;
     }
 
     /**
      * 获取所有数据
-     * @return array
+     *
+     * @param bool $hidden
+     * @return array<string,mixed>
+     *
+     * @example $this->all()
+     * @example $this->all(true)
+     * @example $this->all(false)
      */
-    public function all()
+    public function all(bool $hidden = true): array
     {
-        return $this->build()->data;
+        return array_filter($this->build(), function($key) use ($hidden) {
+            return ($hidden && in_array($key, $this->hiddens)) === false;
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     /**
-     * 数据响应
-     * @param int $status
-     * @param array $headers
-     * @param int $options
-     * @return \Illuminate\Http\JsonResponse
+     * 获取值
+     *
+     * @param string $key
+     * @return mixed
+     *
+     * @example $this->get('message')
      */
-    public function response($status = 200, array $headers = [], $options = JSON_UNESCAPED_UNICODE)
+    public function get(string $key): mixed
     {
-        return response()->json($this->all(), $status, $headers, $options);
+        return array_key_exists($key, $data = $this->all(false)) ? $data[$key] : null;
     }
 
     /**
      * 监听宏
      * 新增with魔术方法
-     * $this->withMsg('ok!')==$this->with('msg','ok!')
-     * @param $name
-     * @param $arguments
-     * @return RenderFactory
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     *
+     * @example $this->withMsg('ok!')
+     * @example $this->with('msg','ok!')
      */
-    public function __call($name, $arguments)
+    public function __call(string $method, array $arguments): mixed
     {
-        if (static::hasMacro($name)) {
-            return $this->macroCall($name, $arguments);
+        if (static::hasMacro($method)) {
+            return $this->macroCall($method, $arguments);
         }
-        if (Str::startsWith($name, 'with')) {
-            $name = Str::substr($name, 4);
+
+        if (Str::startsWith($method, 'with')) {
+            $name = Str::substr($method, 4);
             $name = Str::lower($name);
             return $this->with($name, reset($arguments));
         }
+
+        static::throwBadMethodCallException($method);
     }
 
     /**
-     * @param string $message
-     * @param string $url
-     * @param array $data
-     * @return $this
+     * 数据响应
+     *
+     * @param callable|null $response
+     * @return mixed
      */
-    public function success($message = 'SUCCESS', $url = '', $data = [])
+    public function response(?callable $response = null): mixed
     {
-        $this->with('state', true);
-        $this->with('message', $message);
-        $this->with('url', $url);
-        $this->with('data', $data);
-        $this->with('timestamp', date('Y-m-d\TH:i:s\Z'));
+        $render = function($render) {
+            return $render->format;
+        };
+
+        $format = $this->format ?? $render($this->json());
+
+        return (function($callable) {
+            $response = $this->all(true);
+            $this->reset();
+            return $callable($response);
+        })($response ?? $format);
+    }
+
+    /**
+     * @param int|null $status
+     * @param array|null $headers
+     * @param int|null $options
+     * @return RenderFactory
+     */
+    public function json(?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): RenderFactory
+    {
+        $this->format = function($data) use ($status, $headers, $options) {
+            return response()->json($data, $status, $headers, $options);
+        };
         return $this;
     }
 
     /**
-     * @param string $error
-     * @param string $url
-     * @param array $errors
-     * @return $this
+     * @param string|null $callback
+     * @param int|null $status
+     * @param array|null $headers
+     * @param int|null $options
+     * @return RenderFactory
      */
-    public function error($error = 'ERROR', $url = '', $errors = [])
+    public function jsonp(?string $callback = 'jsonp', ?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): RenderFactory
     {
-        $this->with('state', false);
-        $this->with('error', $error);
-        $this->with('url', $url);
-        $this->with('errors', $errors);
-        $this->with('timestamp', date('Y-m-d\TH:i:s\Z'));
+        $this->format = function($data) use ($callback, $status, $headers, $options) {
+            return response()->jsonp($callback, $data, $status, $headers, $options);
+        };
         return $this;
+    }
+
+    /**
+     * Throw a bad method call exception for the given method.
+     *
+     * @param string $method
+     * @return void
+     *
+     * @throws BadMethodCallException
+     */
+    protected static function throwBadMethodCallException(string $method): void
+    {
+        throw new BadMethodCallException(sprintf(
+            'Method %s::%s does not exist.', static::class, $method
+        ));
     }
 }
