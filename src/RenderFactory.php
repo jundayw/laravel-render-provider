@@ -240,17 +240,11 @@ class RenderFactory implements Contracts\Renderable
      */
     public function response(?callable $response = null): mixed
     {
-        $render = function ($render) {
-            return $render->format;
-        };
-
-        $format = $this->format ?? $render($this->json());
-
-        return (function ($callable) {
-            $response = $this->all(true);
+        $callback = $response ?? $this->format ?? $this->json()->format;
+        $data     = tap($this->all(true), function () {
             $this->reset();
-            return $callable($response);
-        })($response ?? $format);
+        });
+        return call_user_func($callback, $data);
     }
 
     /**
