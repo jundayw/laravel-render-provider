@@ -3,6 +3,7 @@
     "description": "laravel render provider",
     "type": "library",
     "license": "MIT",
+    "homepage": "https://github.com/jundayw/laravel-render-provider",
     "authors": [
         {
             "name": "jundayw",
@@ -14,17 +15,19 @@
     },
     "autoload": {
         "psr-4": {
-            "Jundayw\\LaravelRenderProvider\\": "src/"
+            "Jundayw\\Render\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Jundayw\\LaravelRenderProvider\\RenderServiceProvider"
+                "Jundayw\\Render\\RenderServiceProvider"
             ],
             "aliases": {
-                "Render": "Jundayw\\LaravelRenderProvider\\Support\\Facades\\Render"
+                "Render": "Jundayw\\Render\\Facades\\Render"
             }
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
