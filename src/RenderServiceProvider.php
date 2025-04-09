@@ -1,12 +1,10 @@
 <?php
 
-namespace Jundayw\LaravelRenderProvider;
+namespace Jundayw\Render;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
-use Jundayw\LaravelRenderProvider\Support\Contracts\Render as RenderContract;
-use Jundayw\LaravelRenderProvider\Support\Facades\Render;
-use Jundayw\LaravelRenderProvider\Support\Factories\RenderFactory;
+use Jundayw\Render\Contracts\Renderable;
 
 class RenderServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -15,34 +13,21 @@ class RenderServiceProvider extends ServiceProvider implements DeferrableProvide
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
-        $this->app->bind(RenderContract::class, RenderFactory::class);
-        // PackageManifest loaded from composer.json of extra.laravel.aliases
-        //$this->registerFacade();
-    }
-
-    /**
-     * Register Factories.
-     *
-     * @return void
-     */
-    public function registerFacade()
-    {
-        $this->app->booting(function() {
-            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-            $loader->alias('Render', Render::class);
-        });
+        $this->app->bind(Renderable::class, RenderFactory::class);
     }
 
     /**
      * Bootstrap services.
      *
+     * @param RenderFactory $factory
+     *
      * @return void
      */
-    public function boot(RenderContract $factory)
+    public function boot(RenderFactory $factory): void
     {
-        $factory->macro('success', function(?string $message = 'SUCCESS', ?string $url = null, mixed $data = null) {
+        $factory->macro('success', function (?string $message = 'success', ?string $url = null, mixed $data = null) {
             $this->with('state', true);
             $this->with('message', $message);
             $this->with('url', $url);
@@ -50,7 +35,7 @@ class RenderServiceProvider extends ServiceProvider implements DeferrableProvide
             $this->with('timestamp', date('Y-m-d\TH:i:s\Z'));
             return $this;
         });
-        $factory->macro('error', function(?string $error = 'ERROR', ?string $url = null, mixed $errors = null) {
+        $factory->macro('error', function (?string $error = 'error', ?string $url = null, mixed $errors = null) {
             $this->with('state', false);
             $this->with('error', $error);
             $this->with('url', $url);
@@ -60,8 +45,13 @@ class RenderServiceProvider extends ServiceProvider implements DeferrableProvide
         });
     }
 
-    public function provides()
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides(): array
     {
-        return [RenderContract::class];
+        return [Renderable::class];
     }
 }
