@@ -1,15 +1,15 @@
 <?php
 
-namespace Jundayw\LaravelRenderProvider\Support\Facades;
+namespace Jundayw\Render\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Traits\Macroable;
-use Jundayw\LaravelRenderProvider\Support\Contracts\Render as RenderContract;
-use Jundayw\LaravelRenderProvider\Support\Factories\RenderFactory;
+use Jundayw\Render\Contracts\Renderable;
+use Jundayw\Render\RenderFactory;
 
 /**
  * @method static RenderFactory replace(string $oldKey, string $newKey)
- * @method static RenderFactory hidden(mixed $hiddens)
+ * @method static RenderFactory hide(mixed $hides)
  * @method static RenderFactory forget(mixed $forgets)
  * @method static RenderFactory with(string $key, mixed $value)
  * @method static RenderFactory reset()
@@ -20,8 +20,8 @@ use Jundayw\LaravelRenderProvider\Support\Factories\RenderFactory;
  * @method static mixed response(?callable $response = null)
  * @method static RenderFactory json(?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE)
  * @method static RenderFactory jsonp(?string $callback = 'jsonp', ?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE)
- * @method static RenderFactory success(?string $message = 'SUCCESS', ?string $url = null, mixed $data = null)
- * @method static RenderFactory error(?string $error = 'ERROR', ?string $url = null, mixed $errors = null)
+ * @method static RenderFactory success(?string $message = 'success', ?string $url = null, mixed $data = null)
+ * @method static RenderFactory error(?string $error = 'error', ?string $url = null, mixed $errors = null)
  *
  * @method static void macro($name, $macro)
  * @method static void mixin($mixin, $replace = true)
@@ -40,6 +40,6 @@ class Render extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return RenderContract::class;
+        return Renderable::class;
     }
 }

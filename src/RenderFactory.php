@@ -1,34 +1,35 @@
 <?php
 
-namespace Jundayw\LaravelRenderProvider\Support\Factories;
+namespace Jundayw\Render;
 
 use BadMethodCallException;
+use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-use Jundayw\LaravelRenderProvider\Support\Contracts\Render;
 
-class RenderFactory implements Render
+class RenderFactory implements Contracts\Renderable
 {
     use Macroable {
         __call as macroCall;
     }
 
-    protected $attrs   = [];
-    protected $hiddens = [];
-    protected $forgets = [];
-    protected $data    = [];
-    protected $format;
+    protected array    $attrs   = [];
+    protected array    $hides   = [];
+    protected array    $forgets = [];
+    protected array    $data    = [];
+    protected ?Closure $format  = null;
 
     /**
      * 替换键值
      *
      * @param string $oldKey
      * @param string $newKey
-     * @return RenderFactory
+     *
+     * @return static
      *
      * @example $this->replace('message','msg')
      */
-    public function replace(string $oldKey, string $newKey): RenderFactory
+    public function replace(string $oldKey, string $newKey): static
     {
         if (array_key_exists($oldKey, $this->attrs)) {
             $this->attrs[$oldKey] = $newKey;
@@ -40,19 +41,20 @@ class RenderFactory implements Render
     /**
      * 隐藏键值
      *
-     * @param mixed $hiddens
-     * @return RenderFactory
+     * @param mixed $hides
      *
-     * @example $this->hidden('message')
-     * @example $this->hidden('message','data')
-     * @example $this->hidden(['message','data'])
+     * @return static
+     *
+     * @example $this->hide('message')
+     * @example $this->hide('message','data')
+     * @example $this->hide(['message','data'])
      */
-    public function hidden(mixed $hiddens): RenderFactory
+    public function hide(mixed $hides): static
     {
-        $hiddens = is_array($hiddens) ? $hiddens : func_get_args();
+        $hides = is_array($hides) ? $hides : func_get_args();
 
-        foreach ($hiddens as $hidden) {
-            $this->hiddens[$hidden] = $hidden;
+        foreach ($hides as $hide) {
+            $this->hides[$hide] = $hide;
         }
 
         return $this;
@@ -62,13 +64,14 @@ class RenderFactory implements Render
      * 移除键值
      *
      * @param mixed $forgets
-     * @return RenderFactory
+     *
+     * @return static
      *
      * @example $this->forget('message')
      * @example $this->forget('message','data')
      * @example $this->forget(['message','data'])
      */
-    public function forget(mixed $forgets): RenderFactory
+    public function forget(mixed $forgets): static
     {
         $forgets = is_array($forgets) ? $forgets : func_get_args();
 
@@ -83,12 +86,13 @@ class RenderFactory implements Render
      * 追加数据
      *
      * @param string $key
-     * @param mixed $value
-     * @return RenderFactory
+     * @param mixed  $value
+     *
+     * @return static
      *
      * @example $this->with('message','ok')
      */
-    public function with(string $key, mixed $value): RenderFactory
+    public function with(string $key, mixed $value): static
     {
         $this->attrs[$key] = $key;
         $this->data[$key]  = $value;
@@ -99,13 +103,13 @@ class RenderFactory implements Render
     /**
      * 重置对象
      *
-     * @return RenderFactory
+     * @return static
      *
      * @example $this->reset()
      */
-    public function reset(): RenderFactory
+    public function reset(): static
     {
-        $this->attrs = $this->hiddens = $this->forgets = $this->data = [];
+        $this->attrs = $this->hides = $this->forgets = $this->data = [];
 
         return $this;
     }
@@ -113,11 +117,11 @@ class RenderFactory implements Render
     /**
      * 刷新对象及宏
      *
-     * @return RenderFactory
+     * @return static
      *
      * @example $this->flush()
      */
-    public function flush(): RenderFactory
+    public function flush(): static
     {
         static::flushMacros();
 
@@ -127,13 +131,14 @@ class RenderFactory implements Render
     /**
      * 批量赋值
      *
-     * @param array $data 批量数据
-     * @param bool $append 追加数据模式
-     * @return RenderFactory
+     * @param array $data   批量数据
+     * @param bool  $append 追加数据模式
+     *
+     * @return static
      *
      * @example $this->data(['message'=>'message','state'=>true])
      */
-    public function data(array $data = [], bool $append = false): RenderFactory
+    public function data(array $data = [], bool $append = false): static
     {
         if ($append === false) {
             $this->reset();
@@ -170,17 +175,18 @@ class RenderFactory implements Render
     /**
      * 获取所有数据
      *
-     * @param bool $hidden
+     * @param bool $hide
+     *
      * @return array<string,mixed>
      *
      * @example $this->all()
      * @example $this->all(true)
      * @example $this->all(false)
      */
-    public function all(bool $hidden = true): array
+    public function all(bool $hide = true): array
     {
-        return array_filter($this->build(), function($key) use ($hidden) {
-            return ($hidden && in_array($key, $this->hiddens)) === false;
+        return array_filter($this->build(), function ($key) use ($hide) {
+            return ($hide && in_array($key, $this->hides)) === false;
         }, ARRAY_FILTER_USE_KEY);
     }
 
@@ -188,6 +194,7 @@ class RenderFactory implements Render
      * 获取值
      *
      * @param string $key
+     *
      * @return mixed
      *
      * @example $this->get('message')
@@ -201,8 +208,9 @@ class RenderFactory implements Render
      * 监听宏
      * 新增with魔术方法
      *
-     * @param string $name
-     * @param array $arguments
+     * @param string $method
+     * @param array  $arguments
+     *
      * @return mixed
      *
      * @example $this->withMsg('ok!')
@@ -227,17 +235,18 @@ class RenderFactory implements Render
      * 数据响应
      *
      * @param callable|null $response
+     *
      * @return mixed
      */
     public function response(?callable $response = null): mixed
     {
-        $render = function($render) {
+        $render = function ($render) {
             return $render->format;
         };
 
         $format = $this->format ?? $render($this->json());
 
-        return (function($callable) {
+        return (function ($callable) {
             $response = $this->all(true);
             $this->reset();
             return $callable($response);
@@ -245,14 +254,15 @@ class RenderFactory implements Render
     }
 
     /**
-     * @param int|null $status
+     * @param int|null   $status
      * @param array|null $headers
-     * @param int|null $options
-     * @return RenderFactory
+     * @param int|null   $options
+     *
+     * @return static
      */
-    public function json(?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): RenderFactory
+    public function json(?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): static
     {
-        $this->format = function($data) use ($status, $headers, $options) {
+        $this->format = function ($data) use ($status, $headers, $options) {
             return response()->json($data, $status, $headers, $options);
         };
         return $this;
@@ -260,14 +270,15 @@ class RenderFactory implements Render
 
     /**
      * @param string|null $callback
-     * @param int|null $status
-     * @param array|null $headers
-     * @param int|null $options
-     * @return RenderFactory
+     * @param int|null    $status
+     * @param array|null  $headers
+     * @param int|null    $options
+     *
+     * @return static
      */
-    public function jsonp(?string $callback = 'jsonp', ?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): RenderFactory
+    public function jsonp(?string $callback = 'jsonp', ?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): static
     {
-        $this->format = function($data) use ($callback, $status, $headers, $options) {
+        $this->format = function ($data) use ($callback, $status, $headers, $options) {
             return response()->jsonp($callback, $data, $status, $headers, $options);
         };
         return $this;
@@ -277,6 +288,7 @@ class RenderFactory implements Render
      * Throw a bad method call exception for the given method.
      *
      * @param string $method
+     *
      * @return void
      *
      * @throws BadMethodCallException
