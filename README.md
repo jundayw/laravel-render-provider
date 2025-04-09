@@ -15,11 +15,11 @@ $this->replace('message','msg');
 ```
 
 ## 隐藏键值
-hidden(mixed $hiddens): $this
+hide(mixed $hides): $this
 ```php
-$this->hidden('message');
-$this->hidden('message','data');
-$this->hidden(['message','data']);
+$this->hide('message');
+$this->hide('message','data');
+$this->hide(['message','data']);
 ```
 
 ## 移除键值
@@ -61,7 +61,7 @@ $this->data(['message'=>'message','state'=>true]);
 ```
 
 ## 获取所有数据
-all(bool $hidden = true): array
+all(bool $hide = true): array
 ```php
 $this->all();
 $this->all(true);   // 隐藏键值已过滤
@@ -197,12 +197,12 @@ return Render::success('success', 'url...', 'data...')
 ```
 
 ## 隐藏键值
-若响应数据中需要对敏感数据进行处理，可使用 hidden 方法
+若响应数据中需要对敏感数据进行处理，可使用 hide 方法
 ```php
 return Render::success('success', 'url...', 'data...')
     ->with('appid', '...id...')
     ->with('appkey', '...key...')
-    ->hidden('appkey')
+    ->hide('appkey')
     ->response();
 ```
 ```json
@@ -226,7 +226,7 @@ Render::macro('sign', function($name) {
 return Render::success('ok', 'url...', 'data...')
     ->with('appid', '...id...')
     ->with('appkey', '...key...')
-    ->hidden('appkey')
+    ->hide('appkey')
     ->sign('token')
     ->response();
 ```
@@ -430,9 +430,9 @@ $render = Render::reset()       // 防止数据混淆
     //->success()->error()      // 方法优先级相同
     ->data([], true)            // 批量追加模式
     ->with('forget', 'forget')
-    ->with('hidden', 'hidden')
+    ->with('hide', 'hide')
     ->with('code', 200)
-    ->forget('forget')->hidden('hidden')->replace('code', 'status');// 方法优先级相同
+    ->forget('forget')->hide('hide')->replace('code', 'status');// 方法优先级相同
 
 return $render->get('status');
 return $render->all();
@@ -448,9 +448,9 @@ return Render::reset()          // 防止数据混淆
     //->success()->error()      // 方法优先级相同
     ->data([], true)            // 批量追加模式
     ->with('forget', 'forget')
-    ->with('hidden', 'hidden')
+    ->with('hide', 'hide')
     ->with('code', 200)
-    ->forget('forget')->hidden('hidden')->replace('code', 'status')// 方法优先级相同
+    ->forget('forget')->hide('hide')->replace('code', 'status')// 方法优先级相同
     ->json()->jsonp()           // 方法优先级相同
     ->response();               // response 为防止数据混淆，内部已经调用 reset() 方法
 ```

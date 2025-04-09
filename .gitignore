@@ -1,2 +1,4 @@
 .git
-/vendor/
+composer.lock
+vendor
+.idea
