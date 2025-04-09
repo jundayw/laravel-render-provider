@@ -325,7 +325,7 @@ array (
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Jundayw\LaravelRenderProvider\Support\Facades\Render;
+use Jundayw\Render\Facades\Render;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -365,7 +365,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
-use Jundayw\LaravelRenderProvider\Support\Facades\Render;
+use Jundayw\Render\Facades\Render;
 
 class AppServiceProvider extends ServiceProvider
 {
