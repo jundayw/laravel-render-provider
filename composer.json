@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": ">=8.0"
+        "php": ">=7.4"
     },
     "autoload": {
         "psr-4": {
@@ -19,6 +19,9 @@
         }
     },
     "extra": {
+        "branch-alias": {
+            "dev-master": "5.x-dev"
+        },
         "laravel": {
             "providers": [
                 "Jundayw\\Render\\RenderServiceProvider"
