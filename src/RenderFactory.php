@@ -248,13 +248,13 @@ class RenderFactory implements Contracts\Renderable
     }
 
     /**
-     * @param int|null   $status
-     * @param array|null $headers
-     * @param int|null   $options
+     * @param int   $status
+     * @param array $headers
+     * @param int   $options
      *
      * @return static
      */
-    public function json(?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): static
+    public function json(int $status = 200, array $headers = [], int $options = JSON_UNESCAPED_UNICODE): static
     {
         $this->format = function ($data) use ($status, $headers, $options) {
             return response()->json($data, $status, $headers, $options);
@@ -263,19 +263,39 @@ class RenderFactory implements Contracts\Renderable
     }
 
     /**
-     * @param string|null $callback
-     * @param int|null    $status
-     * @param array|null  $headers
-     * @param int|null    $options
+     * @param string $callback
+     * @param int    $status
+     * @param array  $headers
+     * @param int    $options
      *
      * @return static
      */
-    public function jsonp(?string $callback = 'jsonp', ?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): static
+    public function jsonp(string $callback = 'jsonp', int $status = 200, array $headers = [], int $options = JSON_UNESCAPED_UNICODE): static
     {
         $this->format = function ($data) use ($callback, $status, $headers, $options) {
             return response()->jsonp($callback, $data, $status, $headers, $options);
         };
         return $this;
+    }
+
+    /**
+     * allows a class to decide how it will react when it is treated like a string.
+     *
+     * @return string
+     */
+    public function toString(): string
+    {
+        return $this->response();
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->toString();
     }
 
     /**

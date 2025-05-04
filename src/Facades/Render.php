@@ -18,8 +18,8 @@ use Jundayw\Render\RenderFactory;
  * @method static array all(bool $hidden = true)
  * @method static mixed get(string $key)
  * @method static mixed response(?callable $response = null)
- * @method static RenderFactory json(?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE)
- * @method static RenderFactory jsonp(?string $callback = 'jsonp', ?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE)
+ * @method static RenderFactory json(int $status = 200, array $headers = [], int $options = JSON_UNESCAPED_UNICODE)
+ * @method static RenderFactory jsonp(string $callback = 'jsonp', int $status = 200, array $headers = [], int $options = JSON_UNESCAPED_UNICODE)
  * @method static RenderFactory success(?string $message = 'success', ?string $url = null, mixed $data = null)
  * @method static RenderFactory error(?string $error = 'error', ?string $url = null, mixed $errors = null)
  *
