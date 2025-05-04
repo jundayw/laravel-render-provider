@@ -279,26 +279,6 @@ class RenderFactory implements Contracts\Renderable
     }
 
     /**
-     * allows a class to decide how it will react when it is treated like a string.
-     *
-     * @return string
-     */
-    public function toString(): string
-    {
-        return $this->response();
-    }
-
-    /**
-     * @inheritdoc
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->toString();
-    }
-
-    /**
      * Throw a bad method call exception for the given method.
      *
      * @param string $method

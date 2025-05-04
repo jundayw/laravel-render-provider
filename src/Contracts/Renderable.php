@@ -2,9 +2,7 @@
 
 namespace Jundayw\Render\Contracts;
 
-use Stringable;
-
-interface Renderable extends Stringable
+interface Renderable
 {
     /**
      * 替换键值
