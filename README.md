@@ -1,21 +1,48 @@
+# Laravel Render Provider
+
+Laravel 响应数据格式化服务提供者，它提供了一个链式、灵活、可扩展的响应数据构建工具，非常适合 API 返回场景。
+
+[![GitHub Tag](https://img.shields.io/github/v/tag/jundayw/laravel-render-provider)](https://github.com/jundayw/laravel-render-provider/tags)
+[![Total Downloads](https://img.shields.io/packagist/dt/jundayw/laravel-render-provider?style=flat-square)](https://packagist.org/packages/jundayw/laravel-render-provider)
+[![Packagist Version](https://img.shields.io/packagist/v/jundayw/laravel-render-provider)](https://packagist.org/packages/jundayw/laravel-render-provider)
+[![Packagist PHP Version Support](https://img.shields.io/packagist/php-v/jundayw/laravel-render-provider)](https://github.com/jundayw/laravel-render-provider)
+[![Packagist License](https://img.shields.io/github/license/jundayw/laravel-render-provider)](https://github.com/jundayw/laravel-render-provider)
+
+# 主要特性
+
+1. **规范 API 响应格式**：
+   适用于中大型 Laravel 应用中统一所有接口的响应结构，便于前后端协作与调试。
+
+2. **隐藏敏感字段而不丢失数据签名能力**：
+   可通过 `all(false)` 保留隐藏字段进行签名再输出，避免签名丢失完整性。
+
+3. **扩展性强**：
+   任意响应格式（如 XML、Markdown、HTML 预览）都可通过 `macro` 或重写 `response()` 灵活实现。
+
 # 安装方法
 
 命令行下, 执行 composer 命令安装:
+
 ````
 composer require jundayw/laravel-render-provider
 ````
+
 authentication package that is simple and enjoyable to use.
 
 # 对象方法
 
 ## 替换键值
+
 replace(string $oldKey, string $newKey): $this
+
 ```php
 $this->replace('message','msg');
 ```
 
 ## 隐藏键值
+
 hide(mixed $hides): $this
+
 ```php
 $this->hide('message');
 $this->hide('message','data');
@@ -23,7 +50,9 @@ $this->hide(['message','data']);
 ```
 
 ## 移除键值
+
 forget(mixed $forgets): $this
+
 ```php
 $this->forget('message');
 $this->forget('message','data');
@@ -31,37 +60,49 @@ $this->forget(['message','data']);
 ```
 
 ## 追加数据
+
 with(string $key, mixed $value): $this
+
 ```php
 $this->with('message','ok');
 ```
 
 ## 追加数据
+
 withXxx($value): $this
+
 ```php
 $this->withMsg('ok');
 ```
 
 ## 重置对象
+
 reset(): $this
+
 ```php
 $this->reset();
 ```
 
 ## 刷新对象及宏
+
 flush(): $this
+
 ```php
 $this->flush();
 ```
 
 ## 批量赋值
+
 data(array $data = [], bool $append = false): $this
+
 ```php
 $this->data(['message'=>'message','state'=>true]);
 ```
 
 ## 获取所有数据
+
 all(bool $hide = true): array
+
 ```php
 $this->all();
 $this->all(true);   // 隐藏键值已过滤
@@ -69,43 +110,57 @@ $this->all(false);  // 隐藏键值未过滤
 ```
 
 ## 获取值
+
 get(string $key): mixed
+
 ```php
 $this->get('message');
 ```
 
 ## 数据响应
+
 response(?callable $response = null): mixed
+
 ```php
 $this->response();
 ```
 
 ## JSON
+
 json(?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): $this
+
 ```php
 $this->json();
 ```
 
 ## JSONP
+
 jsonp(?string $callback = 'jsonp', ?int $status = 200, ?array $headers = [], ?int $options = JSON_UNESCAPED_UNICODE): $this
+
 ```php
 $this->jsonp();
 ```
 
 ## 宏：内置成功
+
 success(?string $message = 'SUCCESS', ?string $url = null, mixed $data = null): $this
+
 ```php
 $this->success();
 ```
 
 ## 宏：内置失败
+
 error(?string $error = 'ERROR', ?string $url = null, mixed $errors = null): $this
+
 ```php
 $this->error();
 ```
 
 ## 宏
+
 macro($name, $macro): mixed
+
 ```php
 Render::macro('sign',function($name){
     return $this->with($name,md5(http_build_query($this->all())));
@@ -119,9 +174,11 @@ return Render::success('ok')->sign('token')->response();
 # 使用场景
 
 ## 开箱即用
+
 ```php
 return Render::success('ok', 'url...', 'data...')->response();
 ```
+
 ```json
 {
     "state": true,
@@ -131,9 +188,11 @@ return Render::success('ok', 'url...', 'data...')->response();
     "timestamp": "2022-01-10T06:04:29Z"
 }
 ```
+
 ```php
 return Render::error('error', 'url...', 'data...')->response();
 ```
+
 ```json
 {
     "state": false,
@@ -145,12 +204,15 @@ return Render::error('error', 'url...', 'data...')->response();
 ```
 
 ## 替换键值
+
 将响应数据中键值 timestamp 替换为 time
+
 ```php
 return Render::success('success', 'url...', 'data...')
     ->replace('timestamp', 'time')
     ->response();
 ```
+
 ```json
 {
     "state": true,
@@ -162,12 +224,15 @@ return Render::success('success', 'url...', 'data...')
 ```
 
 ## 移除键值
+
 若响应数据中键值 timestamp、url 不需要，可将其移除
+
 ```php
 return Render::success('success', 'url...', 'data...')
     ->forget('timestamp', 'url')
     ->response();
 ```
+
 ```json
 {
     "state": true,
@@ -177,13 +242,16 @@ return Render::success('success', 'url...', 'data...')
 ```
 
 ## 追加数据
+
 若响应数据中需要新增字段，可使用 with 方法
+
 ```php
 return Render::success('success', 'url...', 'data...')
     ->with('appid', '...id...')
     ->with('appkey', '...key...')
     ->response();
 ```
+
 ```json
 {
     "state": true,
@@ -197,7 +265,9 @@ return Render::success('success', 'url...', 'data...')
 ```
 
 ## 隐藏键值
+
 若响应数据中需要对敏感数据进行处理，可使用 hide 方法
+
 ```php
 return Render::success('success', 'url...', 'data...')
     ->with('appid', '...id...')
@@ -205,6 +275,7 @@ return Render::success('success', 'url...', 'data...')
     ->hide('appkey')
     ->response();
 ```
+
 ```json
 {
     "state": true,
@@ -217,7 +288,9 @@ return Render::success('success', 'url...', 'data...')
 ```
 
 ## 扩展签名
+
 将响应数据及 appid、appkey 进行签名，并且响应数据中不显示 appkey 字段
+
 ```php
 Render::macro('sign', function($name) {
     $data = $this->all(false);// 获取所有数据包含隐藏字段 appkey
@@ -230,6 +303,7 @@ return Render::success('ok', 'url...', 'data...')
     ->sign('token')
     ->response();
 ```
+
 ```json
 {
     "state": true,
@@ -245,11 +319,13 @@ return Render::success('ok', 'url...', 'data...')
 # 响应场景
 
 ## 默认响应数据格式 json
+
 ```php
 return Render::success('ok', 'url...', 'data...')
     ->json()
     ->response();
 ```
+
 ```json
 {
     "state": true,
@@ -261,11 +337,13 @@ return Render::success('ok', 'url...', 'data...')
 ```
 
 ## 响应数据格式 jsonp
+
 ```php
 return Render::success('ok', 'url...', 'data...')
     ->jsonp()
     ->response();
 ```
+
 ```javascript
 jsonp({
     "state": true,
@@ -277,6 +355,7 @@ jsonp({
 ```
 
 ## 扩展响应数据格式：宏方法扩展
+
 ```php
 Render::macro('format', function(callable $callable){
     $this->format = function($data) use ($callable){
@@ -290,6 +369,7 @@ return Render::success('ok', 'url...', 'data...')
     })
     ->response();
 ```
+
 ```php
 array (
   'state' => true,
@@ -301,12 +381,14 @@ array (
 ```
 
 ## 扩展响应数据格式：response 方法扩展
+
 ```php
 return Render::success('ok', 'url...', 'data...')
     ->response(function($data){
         return var_export($data, true);
     });
 ```
+
 ```php
 array (
   'state' => true,
@@ -320,7 +402,9 @@ array (
 # 宏场景
 
 ## RenderFacade
+
 应用包已扩展 success/error 方法，若不适用业务场景，可通过 Render::flush() 方法格式化后自行定义。
+
 ```php
 namespace App\Providers;
 
@@ -353,13 +437,16 @@ class AppServiceProvider extends ServiceProvider
     }
 }
 ```
+
 调用方式
+
 ```php
 return Render::reset()->success('ok', 'url...', 'data...')->with('code', 4)->response();
 return Render::reset()->error('error', 'url...', 'data...')->with('code', 4)->response();
 ```
 
 ## ResponseFacade
+
 ```php
 namespace App\Providers;
 
@@ -394,7 +481,9 @@ class AppServiceProvider extends ServiceProvider
     }
 }
 ```
+
 调用方式
+
 ```php
 return response()->success('ok', 'url...', 'data...')->with('code', 4)->response();
 return response()->error('error', 'url...', 'data...')->with('code', 4)->response();
@@ -403,6 +492,7 @@ return response()->error('error', 'url...', 'data...')->with('code', 4)->respons
 # 其他场景
 
 ## 批量赋值场景
+
 ```php
 $data = [
     'state' => true,
@@ -412,6 +502,7 @@ return Render::data($data)
     ->with('code', 200)
     ->response();
 ```
+
 ```json
 {
     "state": true,
@@ -423,7 +514,9 @@ return Render::data($data)
 # 链式操作优先级
 
 为防止目标数据与预期数据不一致，推荐链式操作优先级：
+
 ## 取值场景
+
 ```php
 $render = Render::reset()       // 防止数据混淆
     ->data([], false)           // 批量覆盖模式
@@ -442,6 +535,7 @@ return $render
 ```
 
 ## 输出响应场景
+
 ```php
 return Render::reset()          // 防止数据混淆
     ->data([], false)           // 批量覆盖模式
