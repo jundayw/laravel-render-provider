@@ -101,7 +101,7 @@ $this->data(['message'=>'message','state'=>true]);
 
 ## 获取所有数据
 
-all(bool $hide = true): array
+all(bool $hidden = true): array
 
 ```php
 $this->all();
@@ -157,7 +157,7 @@ error(?string $error = 'ERROR', ?string $url = null, mixed $errors = null): $thi
 $this->error();
 ```
 
-## 宏
+## 宏：自定义方法
 
 macro($name, $macro): mixed
 
@@ -166,7 +166,7 @@ Render::macro('sign',function($name){
     return $this->with($name,md5(http_build_query($this->all())));
 });
 // 获取签名数据
-$data = Render::reset()->success('ok')->sign('token')->all();
+$data = Render::success('ok')->sign('token')->all();
 // 响应数据
 return Render::success('ok')->sign('token')->response();
 ```
@@ -382,10 +382,21 @@ array (
 
 ## 扩展响应数据格式：response 方法扩展
 
+### 不含隐藏字段
+
 ```php
 return Render::success('ok', 'url...', 'data...')
     ->response(function($data){
         return var_export($data, true);
+    });
+```
+
+### 含隐藏字段
+
+```php
+return Render::success('ok', 'url...', 'data...')
+    ->response(function($data){
+        return var_dump($this->all(), true);
     });
 ```
 
@@ -441,8 +452,8 @@ class AppServiceProvider extends ServiceProvider
 调用方式
 
 ```php
-return Render::reset()->success('ok', 'url...', 'data...')->with('code', 4)->response();
-return Render::reset()->error('error', 'url...', 'data...')->with('code', 4)->response();
+return Render::success('ok', 'url...', 'data...')->with('code', 4)->response();
+return Render::error('error', 'url...', 'data...')->with('code', 4)->response();
 ```
 
 ## ResponseFacade

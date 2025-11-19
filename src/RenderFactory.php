@@ -175,7 +175,7 @@ class RenderFactory implements Contracts\Renderable
     /**
      * 获取所有数据
      *
-     * @param bool $hide
+     * @param bool $hidden
      *
      * @return array<string,mixed>
      *
@@ -183,10 +183,10 @@ class RenderFactory implements Contracts\Renderable
      * @example $this->all(true)
      * @example $this->all(false)
      */
-    public function all(bool $hide = true): array
+    public function all(bool $hidden = true): array
     {
-        return array_filter($this->build(), function ($key) use ($hide) {
-            return ($hide && in_array($key, $this->hides)) === false;
+        return array_filter($this->build(), function ($key) use ($hidden) {
+            return !$hidden || !in_array($key, $this->hides);
         }, ARRAY_FILTER_USE_KEY);
     }
 
@@ -240,11 +240,11 @@ class RenderFactory implements Contracts\Renderable
      */
     public function response(?callable $response = null): mixed
     {
-        $callback = $response ?? $this->format ?? $this->json()->format;
-        $data     = tap($this->all(true), function () {
-            $this->reset();
-        });
-        return call_user_func($callback, $data);
+        return tap(Closure::bind(
+            $response ?? $this->format ?? $this->json()->format,
+            $this,
+            static::class
+        )($this->all()), fn() => $this->reset());
     }
 
     /**
