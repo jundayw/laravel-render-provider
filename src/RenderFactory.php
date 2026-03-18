@@ -238,7 +238,7 @@ class RenderFactory implements Contracts\Renderable
      *
      * @return mixed
      */
-    public function response(?callable $response = null): mixed
+    public function response(callable $response = null): mixed
     {
         return tap(Closure::bind(
             $response ?? $this->format ?? $this->json()->format,
